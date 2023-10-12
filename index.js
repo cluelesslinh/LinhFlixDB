@@ -44,7 +44,13 @@ app.use((err, req, res, next) => {
 //     useUnifiedTopology: true
 // });
 
-mongoose.connect(process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect('mongodb+srv://cluelesslinh:kenshin@linhflixdb.ql71013.mongodb.net/?retryWrites=true&w=majority', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+});
+
+// mongoose.connect(process.env.CONNECTION_URI,
+//     { useNewUrlParser: true, useUnifiedTopology: true });
 
 require("./auth")(app);
 
