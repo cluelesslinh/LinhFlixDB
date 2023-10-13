@@ -370,28 +370,48 @@ app.post(
 app.put(
     "/users/:Username",
     passport.authenticate("jwt", { session: false }),
-    (req, res) => {
-        let hashedPassword = Users.hashPassword(req.body.Password);
-        Users.findOneAndUpdate(
-            { Username: req.params.Username },
+    [
+        // check([field in req.body to validate], [error message if validation fails]).[validation method]();
+        check("Username", "Username is required").isLength({ min: 5 }),
+        check(
+            "Username",
+            "Username contains non alphanumeric characters - not allowed!"
+        ).isAlphanumeric(),
+        check("password", "password is required").not().isEmpty(),
+        check("email", "email is not valid").isEmail(),
+    ],
+    async (request, response) => {
+        //check validation object for errors
+        let errors = validationResult(request);
+        if (!errors.isEmpty()) {
+            return response.status(422).json({ errors: errors.array() });
+        }
+        //CONDITION TO CHECK USERNAME HERE
+        console.log(JSON.stringify(request.body));
+
+        if (request.user.username !== request.params.username) {
+            return response.status(400).send("permission denied");
+        }
+        let hashedPassword = Users.hashPassword(request.body.password);
+
+        await Users.findOneAndUpdate(
+            { Username: request.params.Username },
             {
                 $set: {
-                    Username: req.body.Username,
+                    Username: request.body.Username,
                     Password: hashedPassword,
-                    Email: req.body.Email,
-                    Birthdate: req.body.Birthdate
-                }
+                    Email: request.body.Email,
+                    Birthdate: request.body.Birthdate,
+                },
             },
-            { new: true }, // This line makes sure that the updated document is returned
-            (err, updatedUser) => {
-                if (err) {
-                    console.error(err);
-                    res.status(500).send("Error: " + err);
-                } else {
-                    res.json(updatedUser);
-                }
+            { new: true }
+        ).then((user) => {
+            if (!user) {
+                response.status(500).send(`${request.params.Username} not found`);
+            } else {
+                response.status(201).json(user);
             }
-        );
+        });
     }
 );
 
