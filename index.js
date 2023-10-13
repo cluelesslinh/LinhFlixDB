@@ -37,6 +37,10 @@ app.use((err, req, res, next) => {
     res.status(500).send("Something broke!");
 });
 
+require("./auth")(app);
+const passport = require("passport");
+require("./passport");
+
 // mongoose.connect('mongodb://localhost:27017/LinhFlixDB', {
 //     useNewUrlParser: true,
 //     useUnifiedTopology: true
@@ -49,10 +53,6 @@ mongoose.connect('mongodb+srv://cluelesslinh:kenshin@linhflixdb.ql71013.mongodb.
 
 // mongoose.connect(process.env.CONNECTION_URI,
 //     { useNewUrlParser: true, useUnifiedTopology: true });
-
-require("./auth")(app);
-const passport = require("passport");
-require("./passport");
 
 // GET requests
 
