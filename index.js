@@ -389,7 +389,7 @@ app.put(
         //CONDITION TO CHECK USERNAME HERE
         console.log(JSON.stringify(request.body));
 
-        if (request.user.username !== request.params.username) {
+        if (request.user.Username !== request.params.Username) {
             return response.status(400).send("permission denied");
         }
         let hashedPassword = Users.hashPassword(request.body.password);
