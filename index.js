@@ -398,10 +398,10 @@ app.put(
             { Username: request.params.Username },
             {
                 $set: {
-                    Username: request.body.Username,
+                    Username: req.body.Username,
                     Password: hashedPassword,
-                    Email: request.body.Email,
-                    Birthdate: request.body.Birthdate,
+                    Email: req.body.Email,
+                    Birthdate: req.body.Birthdate
                 },
             },
             { new: true }
