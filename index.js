@@ -4,8 +4,6 @@ const express = require("express");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const passport = require("passport");
-require("./passport");
 
 const { check, validationResult } = require("express-validator");
 
@@ -53,6 +51,8 @@ mongoose.connect('mongodb+srv://cluelesslinh:kenshin@linhflixdb.ql71013.mongodb.
 //     { useNewUrlParser: true, useUnifiedTopology: true });
 
 require("./auth")(app);
+const passport = require("passport");
+require("./passport");
 
 // GET requests
 
