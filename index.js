@@ -340,8 +340,7 @@ app.post(
         await Users.findOneAndUpdate(
             { Username: req.params.Username },
             {
-                // $push: { FavoriteMovies: mongoose.Types.ObjectId(req.params.movieID) }
-                $addToSet: { FavoriteMovies: req.params.movieID }
+                $addToSet: { FavoriteMovies: mongoose.Types.ObjectId(req.params.movieID) }
             },
             { new: true },
             (err, updatedUser) => {
