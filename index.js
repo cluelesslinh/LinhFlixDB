@@ -341,7 +341,7 @@ app.post(
             { Username: req.params.Username },
             {
                 // $push: { FavoriteMovies: mongoose.Types.ObjectId(req.params.movieID) }
-                $push: { FavoriteMovies: req.params.movieID }
+                $addToSet: { FavoriteMovies: req.params.movieID }
             },
             { new: true },
             (err, updatedUser) => {
