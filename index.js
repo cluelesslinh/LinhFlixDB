@@ -333,6 +333,28 @@ app.post(
  * @returns {string} - returns success/error message
  */
 
+// app.post(
+//     "/users/:Username/movies/:movieID",
+//     passport.authenticate("jwt", { session: false }),
+//     async (req, res) => {
+//        await Users.findOneAndUpdate(
+//             { Username: req.params.Username },
+//             {
+//                 $push: { FavoriteMovies: mongoose.Types.ObjectId(req.params.movieID) }
+//             },
+//             { new: true },
+//             (err, updatedUser) => {
+//                 if (err) {
+//                     console.error(err);
+//                     res.status(500).send("Error: " + err);
+//                 } else {
+//                     res.json(updatedUser);
+//                 }
+//             }
+//         );
+//     }
+// );
+
 app.post(
     "/users/:Username/movies/:movieID",
     passport.authenticate("jwt", { session: false }),
@@ -340,18 +362,17 @@ app.post(
         await Users.findOneAndUpdate(
             { Username: req.params.Username },
             {
-                $addToSet: { FavoriteMovies: mongoose.Types.ObjectId(req.params.movieID) }
+                $addToSet: { FavoriteMovies: req.params.movieID },
             },
-            { new: true },
-            (err, updatedUser) => {
-                if (err) {
-                    console.error(err);
-                    res.status(500).send("Error: " + err);
-                } else {
-                    res.json(updatedUser);
-                }
-            }
-        );
+            { new: true }
+        ) // This line makes sure that the updated document is returned
+            .then((updatedUser) => {
+                res.json(updatedUser);
+            })
+            .catch((err) => {
+                console.error(err);
+                res.status(500).send("Error:" + err);
+            });
     }
 );
 
