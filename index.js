@@ -367,6 +367,34 @@ app.post(
  * @returns {string} - returns success/error message
  */
 
+// app.put(
+//     "/users/:Username",
+//     passport.authenticate("jwt", { session: false }),
+//     (req, res) => {
+//         let hashedPassword = Users.hashPassword(req.body.Password);
+//         Users.findOneAndUpdate(
+//             { Username: req.params.Username },
+//             {
+//                 $set: {
+//                     Username: req.body.Username,
+//                     Password: hashedPassword,
+//                     Email: req.body.Email,
+//                     Birthdate: req.body.Birthdate
+//                 }
+//             },
+//             { new: true }, // This line makes sure that the updated document is returned
+//             (err, updatedUser) => {
+//                 if (err) {
+//                     console.error(err);
+//                     res.status(500).send("Error: " + err);
+//                 } else {
+//                     res.json(updatedUser);
+//                 }
+//             }
+//         );
+//     }
+// );
+
 app.put(
     "/users/:Username",
     passport.authenticate("jwt", { session: false }),
@@ -380,22 +408,22 @@ app.put(
         check("password", "password is required").not().isEmpty(),
         check("email", "email is not valid").isEmail(),
     ],
-    async (request, response) => {
+    async (req, res) => {
         //check validation object for errors
         let errors = validationResult(request);
         if (!errors.isEmpty()) {
-            return response.status(422).json({ errors: errors.array() });
+            return res.status(422).json({ errors: errors.array() });
         }
         //CONDITION TO CHECK USERNAME HERE
-        console.log(JSON.stringify(request.body));
+        console.log(JSON.stringify(req.body));
 
-        if (request.user.Username !== request.params.Username) {
-            return response.status(400).send("permission denied");
+        if (req.user.Username !== req.params.Username) {
+            return res.status(400).send("permission denied");
         }
-        let hashedPassword = Users.hashPassword(request.body.password);
+        let hashedPassword = Users.hashPassword(req.body.password);
 
         await Users.findOneAndUpdate(
-            { Username: request.params.Username },
+            { Username: req.params.Username },
             {
                 $set: {
                     Username: req.body.Username,
@@ -407,9 +435,9 @@ app.put(
             { new: true }
         ).then((user) => {
             if (!user) {
-                response.status(500).send(`${request.params.Username} not found`);
+                res.status(500).send(`${req.params.Username} not found`);
             } else {
-                response.status(201).json(user);
+                res.status(201).json(user);
             }
         });
     }
