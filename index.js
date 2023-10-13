@@ -37,6 +37,9 @@ app.use((err, req, res, next) => {
     res.status(500).send("Something broke!");
 });
 
+const cors = require('cors');
+app.use(cors());
+
 require("./auth")(app);
 const passport = require("passport");
 require("./passport");
