@@ -390,34 +390,6 @@ app.put('/users/:Username',
             })
     });
 
-// app.put(
-//     "/users/:Username",
-//     passport.authenticate("jwt", { session: false }),
-//     (req, res) => {
-//         let hashedPassword = Users.hashPassword(req.body.Password);
-//         Users.findOneAndUpdate(
-//             { Username: req.params.Username },
-//             {
-//                 $set: {
-//                     Username: req.body.Username,
-//                     Password: hashedPassword,
-//                     Email: req.body.Email,
-//                     Birthdate: req.body.Birthdate
-//                 }
-//             },
-//             { new: true }, // This line makes sure that the updated document is returned
-//             (err, updatedUser) => {
-//                 if (err) {
-//                     console.error(err);
-//                     res.status(500).send("Error: " + err);
-//                 } else {
-//                     res.json(updatedUser);
-//                 }
-//             }
-//         );
-//     }
-// );
-
 // DELETE request
 
 /**
