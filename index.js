@@ -432,20 +432,22 @@ app.delete(
 app.delete(
     "/users/:Username/movies/:movieID",
     passport.authenticate("jwt", { session: false }),
-    (req, res) => {
-        Users.findOneAndUpdate(
+    async (req, res) => {
+        await Users.findOneAndUpdate(
             { Username: req.params.Username },
-            { $pull: { FavoriteMovies: req.params.movieID } },
-            { new: true },
-            (err, updatedUser) => {
-                if (err) {
-                    console.error(err);
-                    res.status(500).send("Error " + err);
-                } else {
-                    res.json(updatedUser);
-                }
-            }
-        );
+            {
+                $pull: { FavoriteMovies: req.params.movieID },
+            },
+            { new: true }
+        ) // This line makes sure that the updated document is returned
+            .then((updatedUser) => {
+                console.log(JSON.stringify(updatedUser));
+                res.json(updatedUser);
+            })
+            .catch((err) => {
+                console.error(err);
+                res.status(500).send("Error:" + err);
+            });
     }
 );
 
