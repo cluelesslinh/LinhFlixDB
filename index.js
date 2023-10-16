@@ -367,81 +367,31 @@ app.post(
  * @returns {string} - returns success/error message
  */
 
-// app.put(
-//     "/users/:Username",
-//     passport.authenticate("jwt", { session: false }),
-//     (req, res) => {
-//         let hashedPassword = Users.hashPassword(req.body.Password);
-//         Users.findOneAndUpdate(
-//             { Username: req.params.Username },
-//             {
-//                 $set: {
-//                     Username: req.body.Username,
-//                     Password: hashedPassword,
-//                     Email: req.body.Email,
-//                     Birthdate: req.body.Birthdate
-//                 }
-//             },
-//             { new: true }, // This line makes sure that the updated document is returned
-//             (err, updatedUser) => {
-//                 if (err) {
-//                     console.error(err);
-//                     res.status(500).send("Error: " + err);
-//                 } else {
-//                     res.json(updatedUser);
-//                 }
-//             }
-//         );
-//     }
-// );
-
-app.put(
-    "/users/:Username",
-    passport.authenticate("jwt", { session: false }),
-    [
-        // check([field in req.body to validate], [error message if validation fails]).[validation method]();
-        check("Username", "Username is required").isLength({ min: 5 }),
-        check(
-            "Username",
-            "Username contains non alphanumeric characters - not allowed!"
-        ).isAlphanumeric(),
-        check("password", "password is required").not().isEmpty(),
-        check("email", "email is not valid").isEmail(),
-    ],
-    async (req, res) => {
-        //check validation object for errors
-        let errors = validationResult(request);
-        if (!errors.isEmpty()) {
-            return res.status(422).json({ errors: errors.array() });
-        }
-        //CONDITION TO CHECK USERNAME HERE
-        console.log(JSON.stringify(req.body));
-
+app.put('/users/:Username',
+    passport.authenticate('jwt', { session: false }), async (req, res) => {
+        // CONDITION TO CHECK ADDED HERE
         if (req.user.Username !== req.params.Username) {
-            return res.status(400).send("permission denied");
+            return res.status(400).send('Permission denied');
         }
-        let hashedPassword = Users.hashPassword(req.body.password);
-
-        await Users.findOneAndUpdate(
-            { Username: req.params.Username },
+        // CONDITION ENDS
+        await Users.findOneAndUpdate({ Username: req.params.Username }, {
+            $set:
             {
-                $set: {
-                    Username: req.body.Username,
-                    Password: hashedPassword,
-                    Email: req.body.Email,
-                    Birthdate: req.body.Birthdate
-                },
-            },
-            { new: true }
-        ).then((user) => {
-            if (!user) {
-                res.status(500).send(`${req.params.Username} not found`);
-            } else {
-                res.status(201).json(user);
+                Username: req.body.Username,
+                Password: req.body.Password,
+                Email: req.body.Email,
+                Birthdate: req.body.Birthdate
             }
-        });
-    }
-);
+        },
+            { new: true }) // This line makes sure that the updated document is returned
+            .then((updatedUser) => {
+                res.json(updatedUser);
+            })
+            .catch((err) => {
+                console.log(err);
+                res.status(500).send('Error: ' + err);
+            })
+    });
 
 // DELETE request
 
