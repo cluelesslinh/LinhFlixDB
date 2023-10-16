@@ -15,6 +15,18 @@ const Directors = Models.Director;
 
 const app = express();
 
+app.use(morgan("common"));
+app.use(bodyParser.json());
+app.use(express.static("public"));
+
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send("Something broke!");
+});
+
+// const cors = require('cors');
+// app.use(cors());
+
 const cors = require('cors')
 let allowedOrigins = ['http://localhost:8080', 'http://localhost:1234',
     'https://linhflixdb.cyclic.app/', 'https://linhflixdb.netlify.app/'];
@@ -29,15 +41,6 @@ app.use(cors({
         return callback(null, true);
     }
 }));
-
-app.use(morgan("common"));
-app.use(bodyParser.json());
-app.use(express.static("public"));
-
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send("Something broke!");
-});
 
 require("./auth")(app);
 const passport = require("passport");
