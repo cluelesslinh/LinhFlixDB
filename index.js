@@ -38,11 +38,7 @@ app.use((err, req, res, next) => {
 });
 
 const cors = require('cors');
-app.use(cors({
-    origin: "*"
-}
-))
-app.options('*', cors())
+app.use(cors());
 
 require("./auth")(app);
 const passport = require("passport");
@@ -336,21 +332,22 @@ app.post(
 app.post(
     "/users/:Username/movies/:movieID",
     passport.authenticate("jwt", { session: false }),
-    async (req, res) => {
-        await Users.findOneAndUpdate(
+    (req, res) => {
+        Users.findOneAndUpdate(
             { Username: req.params.Username },
             {
-                $addToSet: { FavoriteMovies: req.params.movieID },
+                $push: { FavoriteMovies: mongoose.Types.ObjectId(req.params.movieID) }
             },
-            { new: true }
-        ) // This line makes sure that the updated document is returned
-            .then((updatedUser) => {
-                res.json(updatedUser);
-            })
-            .catch((err) => {
-                console.error(err);
-                res.status(500).send("Error:" + err);
-            });
+            { new: true },
+            (err, updatedUser) => {
+                if (err) {
+                    console.error(err);
+                    res.status(500).send("Error: " + err);
+                } else {
+                    res.json(updatedUser);
+                }
+            }
+        );
     }
 );
 
@@ -367,31 +364,33 @@ app.post(
  * @returns {string} - returns success/error message
  */
 
-app.put('/users/:Username',
-    passport.authenticate('jwt', { session: false }), async (req, res) => {
-        // CONDITION TO CHECK ADDED HERE
-        if (req.user.Username !== req.params.Username) {
-            return res.status(400).send('Permission denied');
-        }
-        // CONDITION ENDS
-        await Users.findOneAndUpdate({ Username: req.params.Username }, {
-            $set:
+app.put(
+    "/users/:Username",
+    passport.authenticate("jwt", { session: false }),
+    (req, res) => {
+        let hashedPassword = Users.hashPassword(req.body.Password);
+        Users.findOneAndUpdate(
+            { Username: req.params.Username },
             {
-                Username: req.body.Username,
-                Password: req.body.Password,
-                Email: req.body.Email,
-                Birthdate: req.body.Birthdate
+                $set: {
+                    Username: req.body.Username,
+                    Password: hashedPassword,
+                    Email: req.body.Email,
+                    Birthdate: req.body.Birthdate
+                }
+            },
+            { new: true }, // This line makes sure that the updated document is returned
+            (err, updatedUser) => {
+                if (err) {
+                    console.error(err);
+                    res.status(500).send("Error: " + err);
+                } else {
+                    res.json(updatedUser);
+                }
             }
-        },
-            { new: true }) // This line makes sure that the updated document is returned
-            .then((updatedUser) => {
-                res.json(updatedUser);
-            })
-            .catch((err) => {
-                console.log(err);
-                res.status(500).send('Error: ' + err);
-            })
-    });
+        );
+    }
+);
 
 // DELETE request
 
@@ -433,22 +432,20 @@ app.delete(
 app.delete(
     "/users/:Username/movies/:movieID",
     passport.authenticate("jwt", { session: false }),
-    async (req, res) => {
-        await Users.findOneAndUpdate(
+    (req, res) => {
+        Users.findOneAndUpdate(
             { Username: req.params.Username },
-            {
-                $pull: { FavoriteMovies: req.params.movieID },
-            },
-            { new: true }
-        ) // This line makes sure that the updated document is returned
-            .then((updatedUser) => {
-                console.log(JSON.stringify(updatedUser));
-                res.json(updatedUser);
-            })
-            .catch((err) => {
-                console.error(err);
-                res.status(500).send("Error:" + err);
-            });
+            { $pull: { FavoriteMovies: req.params.movieID } },
+            { new: true },
+            (err, updatedUser) => {
+                if (err) {
+                    console.error(err);
+                    res.status(500).send("Error " + err);
+                } else {
+                    res.json(updatedUser);
+                }
+            }
+        );
     }
 );
 
