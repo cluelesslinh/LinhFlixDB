@@ -363,33 +363,60 @@ app.post(
  * @returns {string} - returns success/error message
  */
 
-app.put(
-    "/users/:Username",
-    passport.authenticate("jwt", { session: false }),
-    (req, res) => {
-        let hashedPassword = Users.hashPassword(req.body.Password);
-        Users.findOneAndUpdate(
-            { Username: req.params.Username },
+app.put('/users/:Username',
+    passport.authenticate('jwt', { session: false }),
+    async (req, res) => {
+        // CONDITION TO CHECK ADDED HERE
+        if (req.user.Username !== req.params.Username) {
+            return res.status(400).send('Permission denied');
+        }
+        // CONDITION ENDS
+        await Users.findOneAndUpdate({ Username: req.params.Username }, {
+            $set:
             {
-                $set: {
-                    Username: req.body.Username,
-                    Password: hashedPassword,
-                    Email: req.body.Email,
-                    Birthdate: req.body.Birthdate
-                }
-            },
-            { new: true }, // This line makes sure that the updated document is returned
-            (err, updatedUser) => {
-                if (err) {
-                    console.error(err);
-                    res.status(500).send("Error: " + err);
-                } else {
-                    res.json(updatedUser);
-                }
+                Username: req.body.Username,
+                Password: req.body.Password,
+                Email: req.body.Email,
+                Birthdate: req.body.Birthdate
             }
-        );
-    }
-);
+        },
+            { new: true }) // This line makes sure that the updated document is returned
+            .then((updatedUser) => {
+                res.json(updatedUser);
+            })
+            .catch((err) => {
+                console.log(err);
+                res.status(500).send('Error: ' + err);
+            })
+    });
+
+// app.put(
+//     "/users/:Username",
+//     passport.authenticate("jwt", { session: false }),
+//     (req, res) => {
+//         let hashedPassword = Users.hashPassword(req.body.Password);
+//         Users.findOneAndUpdate(
+//             { Username: req.params.Username },
+//             {
+//                 $set: {
+//                     Username: req.body.Username,
+//                     Password: hashedPassword,
+//                     Email: req.body.Email,
+//                     Birthdate: req.body.Birthdate
+//                 }
+//             },
+//             { new: true }, // This line makes sure that the updated document is returned
+//             (err, updatedUser) => {
+//                 if (err) {
+//                     console.error(err);
+//                     res.status(500).send("Error: " + err);
+//                 } else {
+//                     res.json(updatedUser);
+//                 }
+//             }
+//         );
+//     }
+// );
 
 // DELETE request
 
